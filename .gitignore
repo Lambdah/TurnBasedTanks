@@ -259,3 +259,24 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/Assets/Animators
+/Assets/AudioClips
+/Assets/Editor
+/Assets/_Completed-Assets
+/Assets/TutorialInfo
+/Assets/Sprites
+/Assets/Scenes
+/Assets/Profiles
+/Assets/Prefabs
+/Assets/PostProcessing
+/Assets/Models
+/Assets/Materials
+/Assets/Fonts/Bowlby_One
+/Temp
+/ProjectSettings
+/New Unity Project 1.sln
+/New Unity Project 1.Editor.csproj
+/New Unity Project 1.csproj
+/Library
+/Assets/_Complete-Game.unity
+/Assets/Readme.asset
