@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,45 +6,51 @@ public class TankFire : MonoBehaviour {
 
     public int playerNumber = 1;
     public Slider aimSlider;
-    public float chargeRate;
+    public float chargeRate = 1.5f;
 
-    public float turrentRotateSpeed;
-    public float shootableRange;
+    public float turrentRotateSpeed = 0.5f;
     public Transform shootableTargets;
+    public GameObject shootableObject;
 
     public float minDistance = 0f;
     public float maxDistance = 30f;
     public float maxChargeTime = 0.75f;
     public GameObject Shell;
+    public bool wait = true;
 
     private string FireButton;
     private float currentDistance;
     private float chargeSpeed;
     private bool fired;
 
-    private IEnumerator turrentMove;
+    private IEnumerator turretMoveShotPos;
+    private IEnumerator turretMoveOrigPos;
     GameObject tankTurrent;
-    private Vector3 startDir;
     private Vector3 targetDir;
-    private Vector3 newDir;
+    private Vector3 targetDirection;
     private float step;
     float dotProduct;
+    int eventDriver = 0;
 
     GameObject FirePoint;
-    int playerTurn;
+    
     
     ProjectileShell projectileShell;
-    private IEnumerator arrow;
+    // private IEnumerator arrow;
 
 	// Use this for initialization
 	void Start () {
-        tankTurrent = this.transform.Find("TankRenderers/TankTurret").gameObject;
-        turrentMove = RotateTurret(shootableTargets.position, turrentRotateSpeed);
-        FirePoint = this.transform.Find("TankRenderers/TankTurret/FirePoint").gameObject;
-        projectileShell = Shell.GetComponent<ProjectileShell>();
-
+        tankTurrent = this.transform.Find("Tank/TankRenderers/TankTurret").gameObject;
+        // turretMoveShotPos = RotateTurret(shootableTargets.position, turrentRotateSpeed);
+        // turretMoveOrigPos = RotateTurret(transform.forward, turrentRotateSpeed);
+        turretMoveShotPos = RotateTurret(shootableTargets, turrentRotateSpeed);
+        // turretMoveOrigPos = RotateTurret(transform.forward, turrentRotateSpeed);
+        FirePoint = this.transform.Find("Tank/TankRenderers/TankTurret/FirePoint").gameObject;
+        projectileShell = Instantiate(Shell, gameObject.transform).GetComponent<ProjectileShell>();
         chargeSpeed = (maxDistance - minDistance) / maxChargeTime;
-        //arrow = GrowArrow();
+        eventDriver = 0;
+
+
     }
 
     private void OnEnable()
@@ -55,25 +60,77 @@ public class TankFire : MonoBehaviour {
 
     }
 
+    public bool FireTank(float time)
+    {
+        
+        if (distanceOfShootable(shootableTargets) > maxDistance)
+        {
+            // The shootable target is too far
+            return true;
+        }
+        else
+        {
+            if (eventDriver == 0)
+            {
+                // Moving the turret however it moves the tank now
+                turretMoveShotPos = RotateTurret(shootableTargets, turrentRotateSpeed);
+                if (MoveTurret())
+                {
+                    eventDriver++;
+                    
+                }
+            }
+            else if (eventDriver == 1)
+            {
+                eventDriver = 0;
+                return true;
+            }
+        }
+        return false;
+            // return false;
+        /*} else if (eventDriver == 1)
+        {
+            if (DelayedFire(time))
+            {
+                eventDriver++;
+                wait = true;
+            }
+            // return false;
+        }else if (eventDriver == 2)
+        {
+            if (MoveTurret(turretMoveOrigPos))
+            {
+                eventDriver = 0;
+                return true;
+            }
+            // return false;
+        }*/
+
+    }
    
 
     public bool MoveTurret()
     {
-        StartCoroutine(turrentMove);
-
-        dotProduct = Vector3.Dot(tankTurrent.transform.forward, (shootableTargets.position - tankTurrent.transform.forward).normalized);
+        // turretMove = RotateTurret(shootableGameObject.transform.position, turrentRotateSpeed);
+        
+        StartCoroutine(turretMoveShotPos);
+        targetDirection = shootableTargets.position - transform.position;
+        dotProduct = Vector3.Dot(transform.forward, targetDirection.normalized);
+        
         if (dotProduct >= 0.95f)
         {
-            return false;
+            turretMoveShotPos = RotateTurret(shootableTargets, turrentRotateSpeed);
+            return true;
         }
-        return true;
+        
+        return false;
     }
 
-    public bool DelayedFire(float time, int playerNum)
+    public bool DelayedFire(float time)
     {
-        playerTurn = playerNum;
-        Debug.Log("Waiting for fire ");
-        if (fired && playerTurn == playerNumber)
+        
+        // Debug.Log("Waiting for fire ");
+        if (fired)
         {
             Debug.Log("Firing");
             Invoke("Fire", time);
@@ -86,20 +143,32 @@ public class TankFire : MonoBehaviour {
     private void Update()
     {
         
-        if (Input.GetButtonDown("Fire1") && playerTurn == playerNumber && !fired)
+    }
+
+    private void FixedUpdate()
+    {
+        if (wait)
         {
-            fired = false;
+
         }
-        else if(Input.GetButton("Fire1") && !fired && playerTurn == playerNumber)
+        else
         {
-            Debug.Log("Button being held down");
-            currentDistance += chargeSpeed * Time.deltaTime;
-            aimSlider.value = currentDistance;
+            if (Input.GetButtonDown("Fire1") && !fired)
+            {
+                fired = false;
+            }
+            else if (Input.GetButton("Fire1") && !fired)
+            {
+                Debug.Log("Button being held down");
+                currentDistance += chargeSpeed * Time.deltaTime;
+                aimSlider.value = currentDistance;
+            }
+            else if (Input.GetButtonUp("Fire1") && !fired)
+            {
+                fired = true;
+            }
         }
-        else if (Input.GetButtonUp("Fire1") && !fired && playerTurn == playerNumber)
-        {
-            fired = true;
-        }
+        
 
     }
 
@@ -115,24 +184,28 @@ public class TankFire : MonoBehaviour {
         return true;
     }
 
-    
-
-
-    IEnumerator RotateTurret(Vector3 end, float rotateSpeed)
+    public float distanceOfShootable(Transform trans)
     {
-        targetDir = tankTurrent.transform.position - end;
-        targetDir = new Vector3(targetDir.x, 0f, targetDir.z);
-        float turnAngle = Vector3.SignedAngle(targetDir, -transform.forward, transform.up);
-        Debug.Log("Turn angle "+ turnAngle);
-        aimSlider.transform.Rotate(Vector3.forward, turnAngle);
+        return Vector3.Distance(trans.position, transform.position);
+    }
+
+    
+    IEnumerator RotateTurret(Transform end, float rotateSpeed)
+    {
+        
+        targetDir = (end.position - transform.position).normalized;
+        Quaternion rotation = Quaternion.LookRotation(targetDir);
+        Debug.Log("Coroutine starting" + targetDir.ToString());
         float timer = Time.time;
         while (Time.time < timer + rotateSpeed)
         {
+            
             step = Time.deltaTime * rotateSpeed;
-            newDir = Vector3.RotateTowards(tankTurrent.transform.forward, -targetDir, step, 0f);
-            tankTurrent.transform.rotation = Quaternion.LookRotation(newDir);
+            transform.rotation = Quaternion.Lerp(transform.rotation, rotation, step);
+            Debug.Log("rotation dir" + rotation.eulerAngles.ToString());
             yield return null;
         }
+        
 
     }
 

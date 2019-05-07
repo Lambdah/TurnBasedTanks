@@ -18,18 +18,21 @@ public class TankBoardMovement : MonoBehaviour {
     Queue<Node> moveableTiles;
     // List<Node> moveableTiles;
     Graph graph;
-    float speed = 1.0f;
+    // float speed = 1.0f;
     float startTime;
     float nodeDiff;
     Node target;
     MoveScript moveScript;
+    TankFire tankFire;
     bool move = false;
     bool generatePath = true;
+    bool fire = false;
     
 
     private void Awake()
     {
         moveScript = GetComponent<MoveScript>();
+        tankFire = GetComponent<TankFire>();
         graph = GameObject.FindGameObjectWithTag("BoardManager").GetComponent<Graph>();
     }
 
@@ -115,7 +118,7 @@ public class TankBoardMovement : MonoBehaviour {
                 CreatePath();
                 generatePath = false;
             }
-            if (Input.GetMouseButtonUp(0) && generatePath == false && TankPath != null)
+            if (Input.GetMouseButtonUp(0) && generatePath == false) // TankPath != null
             {
                 moveScript.TargetMove(TankPath);
                 DeactivePath();
@@ -127,9 +130,18 @@ public class TankBoardMovement : MonoBehaviour {
                 {
                     move = false;
                     TankPath.Clear();
-                    StartCoroutine("ExecuteAfterTime", 0.4f);
-                    
+                    fire = true;   
                 }
+            }
+            if (fire)
+            {
+                
+                if (tankFire.FireTank(0.5f))
+                {
+                    fire = false;
+                    StartCoroutine("ExecuteAfterTime", 0.7f);
+                }
+                
             }
         }
         

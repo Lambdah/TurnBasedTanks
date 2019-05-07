@@ -24,7 +24,7 @@ public class MoveScript : MonoBehaviour {
 
     private Vector3 newDir;
     private float step;
-
+    
     private bool rotate;
     private bool move;
 

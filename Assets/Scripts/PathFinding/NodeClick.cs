@@ -21,7 +21,9 @@ public class NodeClick : MonoBehaviour {
 	void Update () {
 		
 	}
-
+    // Refactor this so instead of using a game object use a UI element that is in world space
+    // that one can click on. Doing this will hopefully prevent the error of when clicking a targetNode, it will 
+    // not show the pathway is null error
     private void OnMouseDown()
     {
         // Debug.Log(node.ToString());
