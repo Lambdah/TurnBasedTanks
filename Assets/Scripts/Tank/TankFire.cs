@@ -8,7 +8,7 @@ public class TankFire : MonoBehaviour {
     public Slider aimSlider;
     public float chargeRate = 1.5f;
 
-    public float turrentRotateSpeed = 0.5f;
+    public float turrentRotateSpeed = 2.2f;
     public Transform shootableTargets;
     public GameObject shootableObject;
 
@@ -31,6 +31,7 @@ public class TankFire : MonoBehaviour {
     private float step;
     float dotProduct;
     int eventDriver = 0;
+    private bool chargeFireForward = true;
 
     GameObject FirePoint;
     
@@ -62,7 +63,7 @@ public class TankFire : MonoBehaviour {
 
     public bool FireTank(float time)
     {
-        
+
         if (distanceOfShootable(shootableTargets) > maxDistance)
         {
             // The shootable target is too far
@@ -77,35 +78,28 @@ public class TankFire : MonoBehaviour {
                 if (MoveTurret())
                 {
                     eventDriver++;
-                    
                 }
             }
             else if (eventDriver == 1)
             {
+                if (DelayedFire(time))
+                {
+                    eventDriver++;
+                }
+                wait = false;
+            }
+            else if (eventDriver == 2)
+            {
+                wait = true;
+                fired = false;
+                chargeFireForward = true;
+                aimSlider.value = minDistance;
                 eventDriver = 0;
                 return true;
             }
         }
         return false;
-            // return false;
-        /*} else if (eventDriver == 1)
-        {
-            if (DelayedFire(time))
-            {
-                eventDriver++;
-                wait = true;
-            }
-            // return false;
-        }else if (eventDriver == 2)
-        {
-            if (MoveTurret(turretMoveOrigPos))
-            {
-                eventDriver = 0;
-                return true;
-            }
-            // return false;
-        }*/
-
+            
     }
    
 
@@ -115,14 +109,12 @@ public class TankFire : MonoBehaviour {
         
         StartCoroutine(turretMoveShotPos);
         targetDirection = shootableTargets.position - transform.position;
-        dotProduct = Vector3.Dot(transform.forward, targetDirection.normalized);
-        
+        // dotProduct = Vector3.Dot(transform.forward, targetDirection.normalized);
+        dotProduct = Vector3.Dot(tankTurrent.transform.forward, targetDirection.normalized);
         if (dotProduct >= 0.95f)
         {
-            turretMoveShotPos = RotateTurret(shootableTargets, turrentRotateSpeed);
             return true;
         }
-        
         return false;
     }
 
@@ -159,9 +151,24 @@ public class TankFire : MonoBehaviour {
             }
             else if (Input.GetButton("Fire1") && !fired)
             {
-                Debug.Log("Button being held down");
-                currentDistance += chargeSpeed * Time.deltaTime;
+                if (chargeFireForward)
+                {
+                    currentDistance += chargeSpeed * Time.deltaTime;
+                }
+                else
+                {
+                    currentDistance -= chargeSpeed * Time.deltaTime;
+                }
+                
                 aimSlider.value = currentDistance;
+                if (currentDistance >= maxDistance)
+                {
+                    chargeFireForward = false;
+                }
+                else if (currentDistance <= minDistance)
+                {
+                    chargeFireForward = true;
+                }
             }
             else if (Input.GetButtonUp("Fire1") && !fired)
             {
@@ -192,17 +199,17 @@ public class TankFire : MonoBehaviour {
     
     IEnumerator RotateTurret(Transform end, float rotateSpeed)
     {
-        
+
         targetDir = (end.position - transform.position).normalized;
         Quaternion rotation = Quaternion.LookRotation(targetDir);
-        Debug.Log("Coroutine starting" + targetDir.ToString());
         float timer = Time.time;
         while (Time.time < timer + rotateSpeed)
         {
             
             step = Time.deltaTime * rotateSpeed;
-            transform.rotation = Quaternion.Lerp(transform.rotation, rotation, step);
-            Debug.Log("rotation dir" + rotation.eulerAngles.ToString());
+            // transform.rotation = Quaternion.Lerp(transform.rotation, rotation, step);
+            tankTurrent.transform.rotation = Quaternion.Lerp(tankTurrent.transform.rotation, rotation, step);
+            // Debug.Log("rotation dir" + rotation.eulerAngles.ToString());
             yield return null;
         }
         
