@@ -13,7 +13,7 @@ public class TankFire : MonoBehaviour {
     public GameObject shootableObject;
 
     public float minDistance = 0f;
-    public float maxDistance = 30f;
+    public float maxDistance = 15f;
     public float maxChargeTime = 0.75f;
     public GameObject Shell;
     public bool wait = true;
@@ -32,7 +32,6 @@ public class TankFire : MonoBehaviour {
     float dotProduct;
     int eventDriver = 0;
     private bool chargeFireForward = true;
-
     GameObject FirePoint;
     
     
@@ -51,7 +50,6 @@ public class TankFire : MonoBehaviour {
         chargeSpeed = (maxDistance - minDistance) / maxChargeTime;
         eventDriver = 0;
 
-
     }
 
     private void OnEnable()
@@ -67,6 +65,7 @@ public class TankFire : MonoBehaviour {
         if (distanceOfShootable(shootableTargets) > maxDistance)
         {
             // The shootable target is too far
+            Debug.Log(distanceOfShootable(shootableTargets));
             return true;
         }
         else
@@ -82,15 +81,25 @@ public class TankFire : MonoBehaviour {
             }
             else if (eventDriver == 1)
             {
+                wait = false;
                 if (DelayedFire(time))
                 {
                     eventDriver++;
                 }
-                wait = false;
+                
             }
             else if (eventDriver == 2)
             {
                 wait = true;
+                if (projectileShell.collided)
+                {
+                    eventDriver++;
+                    projectileShell.collided = false;
+                }
+                
+            }
+            else if (eventDriver == 3)
+            {
                 fired = false;
                 chargeFireForward = true;
                 aimSlider.value = minDistance;
@@ -121,10 +130,8 @@ public class TankFire : MonoBehaviour {
     public bool DelayedFire(float time)
     {
         
-        // Debug.Log("Waiting for fire ");
         if (fired)
         {
-            Debug.Log("Firing");
             Invoke("Fire", time);
             return true;
         }
@@ -137,20 +144,27 @@ public class TankFire : MonoBehaviour {
         
     }
 
+    // Current known bugs
+    // Sometimes the Arrow sticks and nothing occurs unless Fire1 button is pressed again
+    // The first  shot fired from each tank does not work
+
     private void FixedUpdate()
     {
         if (wait)
         {
-
+            
         }
         else
         {
+            Debug.Log("Starting the if button");
             if (Input.GetButtonDown("Fire1") && !fired)
             {
+                Debug.Log("Button down");
                 fired = false;
             }
             else if (Input.GetButton("Fire1") && !fired)
             {
+                Debug.Log("Get the button");
                 if (chargeFireForward)
                 {
                     currentDistance += chargeSpeed * Time.deltaTime;
@@ -160,7 +174,6 @@ public class TankFire : MonoBehaviour {
                     currentDistance -= chargeSpeed * Time.deltaTime;
                 }
                 
-                aimSlider.value = currentDistance;
                 if (currentDistance >= maxDistance)
                 {
                     chargeFireForward = false;
@@ -169,9 +182,11 @@ public class TankFire : MonoBehaviour {
                 {
                     chargeFireForward = true;
                 }
+                aimSlider.value = currentDistance;
             }
             else if (Input.GetButtonUp("Fire1") && !fired)
             {
+                Debug.Log("Button up");
                 fired = true;
             }
         }
@@ -181,9 +196,8 @@ public class TankFire : MonoBehaviour {
 
     public bool Fire()
     {
-        //Debug.Log("Fires from tankFire");
-        //aimSlider.value = minDistance;
-        //projectileShell.Fire(FirePoint.transform, shootableTargets);
+        
+        // float dist = Vector3.Distance(FirePoint.transform.position, shootableTargets.position);
         float dist = Vector3.Distance(FirePoint.transform.position, shootableTargets.position);
         float percentDist = currentDistance / dist;
         Vector3 LerpPosition = Vector3.Lerp(transform.position, shootableTargets.position, percentDist);

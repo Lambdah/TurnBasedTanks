@@ -5,7 +5,6 @@ using UnityEngine;
 public class ProjectileShell : MonoBehaviour {
     
     public Transform targetPosition;
-    public bool fire;
     public bool collided;
     public float degrees;
     public ParticleSystem shellExplosion;
@@ -19,10 +18,9 @@ public class ProjectileShell : MonoBehaviour {
     
     // Use this for initialization
     void Start () {
-        fire = false;
-        collided = false;
         this.gameObject.SetActive(false);
         shellExplosion.gameObject.SetActive(false);
+        collided = false;
     }
 	
 	// Update is called once per frame
@@ -35,17 +33,7 @@ public class ProjectileShell : MonoBehaviour {
         transform.rotation = Quaternion.LookRotation(rb.velocity);
     }
 
-    public void Fire(Transform startPos, Transform targetPos)
-    {
-        this.gameObject.SetActive(true);
-        rb = GetComponent<Rigidbody>();
-        //velocity_obj = BallisticVelocityVector(transform.position, target, degrees);
-        transform.position = startPos.position;
-        velocity_obj = BallisticVelocityVector(transform.position, targetPos.position, degrees);
-        rb.velocity = velocity_obj;
-        fire = true;
-    }
-
+    
     public void FireArrow(Vector3 startPos, Vector3 Arrow)
     {
         shellExplosion.gameObject.SetActive(false);
@@ -55,18 +43,17 @@ public class ProjectileShell : MonoBehaviour {
         transform.position = startPos;
         velocity_obj = BallisticVelocityVector(transform.position, Arrow, degrees);
         rb.velocity = velocity_obj;
-        fire = true;
+        shellExplosion.gameObject.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider collision)
     {
-        Debug.Log("Hit the collider: " + collision.gameObject.tag.ToString());
-        this.gameObject.SetActive(false);
+        Debug.Log("Collision " + collision.gameObject.tag);
         shellExplosion.gameObject.SetActive(true);
         shellExplosion.Play();
         // explosionAudio.Play();
-        fire = false;
         collided = true;
+        this.gameObject.SetActive(false);
     }
 
     Vector3 BallisticVelocityVector(Vector3 start, Vector3 target, float angle)
