@@ -33,6 +33,11 @@ public class TankFire : MonoBehaviour {
     int eventDriver = 0;
     private bool chargeFireForward = true;
     GameObject FirePoint;
+
+    public float prevDistance;
+    bool charging;
+
+    public float maxCharge = 1.75f;
     
     
     ProjectileShell projectileShell;
@@ -49,7 +54,7 @@ public class TankFire : MonoBehaviour {
         projectileShell = Instantiate(Shell, gameObject.transform).GetComponent<ProjectileShell>();
         chargeSpeed = (maxDistance - minDistance) / maxChargeTime;
         eventDriver = 0;
-
+        currentDistance = minDistance;
     }
 
     private void OnEnable()
@@ -61,11 +66,10 @@ public class TankFire : MonoBehaviour {
 
     public bool FireTank(float time)
     {
-
+        
         if (distanceOfShootable(shootableTargets) > maxDistance)
         {
             // The shootable target is too far
-            Debug.Log(distanceOfShootable(shootableTargets));
             return true;
         }
         else
@@ -77,6 +81,9 @@ public class TankFire : MonoBehaviour {
                 if (MoveTurret())
                 {
                     eventDriver++;
+                    currentDistance = minDistance;
+                    aimSlider.value = minDistance;
+                    charging = false;
                 }
             }
             else if (eventDriver == 1)
@@ -104,6 +111,7 @@ public class TankFire : MonoBehaviour {
                 chargeFireForward = true;
                 aimSlider.value = minDistance;
                 eventDriver = 0;
+                charging = false;
                 return true;
             }
         }
@@ -156,15 +164,14 @@ public class TankFire : MonoBehaviour {
         }
         else
         {
-            Debug.Log("Starting the if button");
+            
+            prevDistance = currentDistance;
             if (Input.GetButtonDown("Fire1") && !fired)
             {
-                Debug.Log("Button down");
                 fired = false;
             }
             else if (Input.GetButton("Fire1") && !fired)
             {
-                Debug.Log("Get the button");
                 if (chargeFireForward)
                 {
                     currentDistance += chargeSpeed * Time.deltaTime;
@@ -183,10 +190,15 @@ public class TankFire : MonoBehaviour {
                     chargeFireForward = true;
                 }
                 aimSlider.value = currentDistance;
-            }
-            else if (Input.GetButtonUp("Fire1") && !fired)
+                charging = true;
+            }else if (Input.GetButtonUp("Fire1") && !fired)
             {
-                Debug.Log("Button up");
+                fired = true;
+            }
+
+            if (prevDistance == currentDistance && charging && !fired)
+            {
+                // Catches the sticky fire button issue
                 fired = true;
             }
         }
@@ -194,13 +206,37 @@ public class TankFire : MonoBehaviour {
 
     }
 
+    // Lerps between a and b with a < b
+    // if c = b occurs when t = 1 where c is the returned value
+    private float Lerp(float a, float b, float t)
+    {
+        return t * b + (1 - t) * a;
+    }
+
+    public Vector3 VectorLerp(Vector3 a, Vector3 b, float t)
+    {
+        float x_dir = Lerp(a.x, b.x, t);
+        float y_dir = Lerp(a.y, b.y, t);
+        float z_dir = Lerp(a.z, b.z, t);
+
+        return new Vector3(x_dir, y_dir, z_dir);
+    }
+
+
     public bool Fire()
     {
-        
-        // float dist = Vector3.Distance(FirePoint.transform.position, shootableTargets.position);
+        Vector3 dirMax = maxDistance * shootableTargets.position.normalized;
+        Vector3 twoMax = 2f * shootableTargets.position.normalized;
+        // Debug.DrawLine(FirePoint.transform.position, dirMax, Color.blue, 15.0f);
+        // Debug.DrawLine(FirePoint.transform.position, 2*shootableTargets.position.normalized, Color.green, 15.0f);
+        // Debug.DrawLine(FirePoint.transform.position, shootableTargets.position, Color.red, 15.0f);
         float dist = Vector3.Distance(FirePoint.transform.position, shootableTargets.position);
+        // Vector3 maxDistanceDir = shootableTargets.position.normalized * maxDistance;
+        // float dist = Vector3.Distance(FirePoint.transform.position, maxDistanceDir);
+        // float percentDist = currentDistance / dist;
         float percentDist = currentDistance / dist;
         Vector3 LerpPosition = Vector3.Lerp(transform.position, shootableTargets.position, percentDist);
+        
         projectileShell.FireArrow(FirePoint.transform.position, LerpPosition);
         return true;
     }

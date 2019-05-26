@@ -7,20 +7,25 @@ public class ProjectileShell : MonoBehaviour {
     public Transform targetPosition;
     public bool collided;
     public float degrees;
-    public ParticleSystem shellExplosion;
+    public GameObject shellExplosion_prefab;
     public AudioSource explosionAudio;
+    public float shellDamage = 20f;
     
 
     
     Vector3 target;
     private Rigidbody rb;
     Vector3 velocity_obj;
-    
+    private ParticleSystem shellExplosion;
+    private AudioSource shellExplosionAudio;
+
     // Use this for initialization
     void Start () {
-        this.gameObject.SetActive(false);
+        shellExplosion = Instantiate(shellExplosion_prefab).GetComponent<ParticleSystem>();
+        shellExplosionAudio = shellExplosion_prefab.GetComponent<AudioSource>();
         shellExplosion.gameObject.SetActive(false);
         collided = false;
+        this.gameObject.SetActive(false);
     }
 	
 	// Update is called once per frame
@@ -50,8 +55,9 @@ public class ProjectileShell : MonoBehaviour {
     {
         Debug.Log("Collision " + collision.gameObject.tag);
         shellExplosion.gameObject.SetActive(true);
+        shellExplosion.gameObject.transform.position = collision.gameObject.transform.position;
         shellExplosion.Play();
-        // explosionAudio.Play();
+        shellExplosionAudio.Play();
         collided = true;
         this.gameObject.SetActive(false);
     }
