@@ -18,6 +18,7 @@ public class ProjectileShell : MonoBehaviour {
     Vector3 velocity_obj;
     private ParticleSystem shellExplosion;
     private AudioSource shellExplosionAudio;
+    private CameraFollow cam;
 
     // Use this for initialization
     void Start () {
@@ -43,20 +44,19 @@ public class ProjectileShell : MonoBehaviour {
         shellExplosionAudio = shellExplosion_prefab.GetComponent<AudioSource>();
         shellExplosion.gameObject.SetActive(false);
         collided = false;
-        // this.gameObject.SetActive(false);
-        Debug.Log("Start for the projectile SetStart");
+        cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraFollow>();
+        rb = GetComponent<Rigidbody>();
     }
     
     public void FireArrow(Vector3 startPos, Vector3 Arrow)
     {
         shellExplosion.gameObject.SetActive(false);
         this.gameObject.SetActive(true);
-        rb = GetComponent<Rigidbody>();
         //velocity_obj = BallisticVelocityVector(transform.position, target, degrees);
         transform.position = startPos;
         velocity_obj = BallisticVelocityVector(transform.position, Arrow, degrees);
         rb.velocity = velocity_obj;
-        shellExplosion.gameObject.SetActive(false);
+        cam.ChaseAction(this.gameObject);
     }
 
     private void OnTriggerEnter(Collider collision)
@@ -64,6 +64,7 @@ public class ProjectileShell : MonoBehaviour {
         // Debug.Log("Collision " + collision.gameObject.tag);
         if (collision.gameObject.tag == "Node" || collision.gameObject.tag == "Player")
         {
+            
             shellExplosion.gameObject.SetActive(true);
             shellExplosion.gameObject.transform.position = collision.gameObject.transform.position;
             shellExplosion.Play();
@@ -71,11 +72,12 @@ public class ProjectileShell : MonoBehaviour {
             // Think about creating a SoundManager and just play it from there to get
             // rid of the warning. However, the sound still plays
             shellExplosionAudio.Play();
+            cam.StopChase(this.gameObject.transform.position);
             collided = true;
-            StartCoroutine("ExecuteAfterTime", 1.0f);
         }
-       
+        
         this.gameObject.SetActive(false);
+
     }
 
     Vector3 BallisticVelocityVector(Vector3 start, Vector3 target, float angle)
@@ -91,10 +93,6 @@ public class ProjectileShell : MonoBehaviour {
         return velocity * direction.normalized;
     }
 
-    IEnumerator ExecuteAfterTime(float time)
-    {
-        yield return new WaitForSeconds(time);
-
-    }
+    
 
 }
