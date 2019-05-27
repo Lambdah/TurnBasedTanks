@@ -3,7 +3,8 @@ using UnityEngine.UI;
 
 public class TankHealth : MonoBehaviour
 {
-    public float m_StartingHealth = 100f;          
+    public float m_StartingHealth = 100f;
+    public float m_damage = 20f;
     public Slider m_Slider;                        
     public Image m_FillImage;                      
     public Color m_FullHealthColor = Color.green;  
@@ -68,5 +69,14 @@ public class TankHealth : MonoBehaviour
         m_ExplosionAudio.Play();
 
         gameObject.SetActive(false);
+    }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Shell")
+        {
+            Debug.Log("Hit");
+            TakeDamage(m_damage);
+        }
     }
 }

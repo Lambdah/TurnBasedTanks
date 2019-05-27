@@ -51,7 +51,9 @@ public class TankFire : MonoBehaviour {
         turretMoveShotPos = RotateTurret(shootableTargets, turrentRotateSpeed);
         // turretMoveOrigPos = RotateTurret(transform.forward, turrentRotateSpeed);
         FirePoint = this.transform.Find("Tank/TankRenderers/TankTurret/FirePoint").gameObject;
-        projectileShell = Instantiate(Shell, gameObject.transform).GetComponent<ProjectileShell>();
+        // projectileShell = Instantiate(Shell, gameObject.transform).GetComponent<ProjectileShell>();
+        projectileShell = Instantiate(Shell, new Vector3(0,0,-999f), Quaternion.identity).GetComponent<ProjectileShell>();
+        projectileShell.SetStart();
         chargeSpeed = (maxDistance - minDistance) / maxChargeTime;
         eventDriver = 0;
         currentDistance = minDistance;
@@ -97,6 +99,7 @@ public class TankFire : MonoBehaviour {
             }
             else if (eventDriver == 2)
             {
+                // Wait boolean stops the charging in the fixed update
                 wait = true;
                 if (projectileShell.collided)
                 {

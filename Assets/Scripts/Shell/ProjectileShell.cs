@@ -21,11 +21,7 @@ public class ProjectileShell : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        shellExplosion = Instantiate(shellExplosion_prefab).GetComponent<ParticleSystem>();
-        shellExplosionAudio = shellExplosion_prefab.GetComponent<AudioSource>();
-        shellExplosion.gameObject.SetActive(false);
-        collided = false;
-        this.gameObject.SetActive(false);
+        
     }
 	
 	// Update is called once per frame
@@ -38,6 +34,18 @@ public class ProjectileShell : MonoBehaviour {
         transform.rotation = Quaternion.LookRotation(rb.velocity);
     }
 
+    public void SetStart()
+    {
+        // A lot of null reference errors occur with shellExplosion at the start of the game
+        // when this code was in Start() function. So moved it to this function and have TankFire() call 
+        // this function when gameobject is instantiated
+        shellExplosion = Instantiate(shellExplosion_prefab).GetComponent<ParticleSystem>();
+        shellExplosionAudio = shellExplosion_prefab.GetComponent<AudioSource>();
+        shellExplosion.gameObject.SetActive(false);
+        collided = false;
+        // this.gameObject.SetActive(false);
+        Debug.Log("Start for the projectile SetStart");
+    }
     
     public void FireArrow(Vector3 startPos, Vector3 Arrow)
     {
@@ -53,12 +61,20 @@ public class ProjectileShell : MonoBehaviour {
 
     private void OnTriggerEnter(Collider collision)
     {
-        Debug.Log("Collision " + collision.gameObject.tag);
-        shellExplosion.gameObject.SetActive(true);
-        shellExplosion.gameObject.transform.position = collision.gameObject.transform.position;
-        shellExplosion.Play();
-        shellExplosionAudio.Play();
-        collided = true;
+        // Debug.Log("Collision " + collision.gameObject.tag);
+        if (collision.gameObject.tag == "Node" || collision.gameObject.tag == "Player")
+        {
+            shellExplosion.gameObject.SetActive(true);
+            shellExplosion.gameObject.transform.position = collision.gameObject.transform.position;
+            shellExplosion.Play();
+            // Get a warning about the gameobject is deactivated and playing the sound.
+            // Think about creating a SoundManager and just play it from there to get
+            // rid of the warning. However, the sound still plays
+            shellExplosionAudio.Play();
+            collided = true;
+            StartCoroutine("ExecuteAfterTime", 1.0f);
+        }
+       
         this.gameObject.SetActive(false);
     }
 
@@ -73,6 +89,12 @@ public class ProjectileShell : MonoBehaviour {
         distance += height / Mathf.Tan(theta);
         float velocity = Mathf.Sqrt(distance * Physics.gravity.magnitude / Mathf.Sin(2 * theta));
         return velocity * direction.normalized;
+    }
+
+    IEnumerator ExecuteAfterTime(float time)
+    {
+        yield return new WaitForSeconds(time);
+
     }
 
 }
