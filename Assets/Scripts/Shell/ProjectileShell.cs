@@ -8,7 +8,6 @@ public class ProjectileShell : MonoBehaviour {
     public bool collided;
     public float degrees;
     public GameObject shellExplosion_prefab;
-    public AudioSource explosionAudio;
     public float shellDamage = 20f;
     
 
@@ -17,12 +16,13 @@ public class ProjectileShell : MonoBehaviour {
     private Rigidbody rb;
     Vector3 velocity_obj;
     private ParticleSystem shellExplosion;
-    private AudioSource shellExplosionAudio;
+    // private AudioSource shellExplosionAudio;
+    private SoundManager sm;
     private CameraFollow cam;
+    
 
     // Use this for initialization
     void Start () {
-        
     }
 	
 	// Update is called once per frame
@@ -30,9 +30,11 @@ public class ProjectileShell : MonoBehaviour {
 		
 	}
 
+    
     void FixedUpdate()
     {
         transform.rotation = Quaternion.LookRotation(rb.velocity);
+        
     }
 
     public void SetStart()
@@ -41,7 +43,8 @@ public class ProjectileShell : MonoBehaviour {
         // when this code was in Start() function. So moved it to this function and have TankFire() call 
         // this function when gameobject is instantiated
         shellExplosion = Instantiate(shellExplosion_prefab).GetComponent<ParticleSystem>();
-        shellExplosionAudio = shellExplosion_prefab.GetComponent<AudioSource>();
+        // shellExplosionAudio = shellExplosion_prefab.GetComponent<AudioSource>();
+        sm = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
         shellExplosion.gameObject.SetActive(false);
         collided = false;
         cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraFollow>();
@@ -57,6 +60,14 @@ public class ProjectileShell : MonoBehaviour {
         velocity_obj = BallisticVelocityVector(transform.position, Arrow, degrees);
         rb.velocity = velocity_obj;
         cam.ChaseAction(this.gameObject);
+    
+    }
+
+    public void DestroyShell()
+    {
+        sm.playShellExplosion();
+        cam.StopChase(this.gameObject.transform.position);
+        collided = true;
     }
 
     private void OnTriggerEnter(Collider collision)
@@ -68,16 +79,12 @@ public class ProjectileShell : MonoBehaviour {
             shellExplosion.gameObject.SetActive(true);
             shellExplosion.gameObject.transform.position = collision.gameObject.transform.position;
             shellExplosion.Play();
-            // Get a warning about the gameobject is deactivated and playing the sound.
-            // Think about creating a SoundManager and just play it from there to get
-            // rid of the warning. However, the sound still plays
-            shellExplosionAudio.Play();
-            cam.StopChase(this.gameObject.transform.position);
-            collided = true;
+            
+            
+            DestroyShell();
         }
         
         this.gameObject.SetActive(false);
-
     }
 
     Vector3 BallisticVelocityVector(Vector3 start, Vector3 target, float angle)
@@ -93,6 +100,5 @@ public class ProjectileShell : MonoBehaviour {
         return velocity * direction.normalized;
     }
 
-    
 
 }

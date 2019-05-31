@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     // PathFind path = new PathFind();
     public GameObject tank;
     public GameObject boardManager;
+    public GameObject soundManager;
     [HideInInspector]public CameraFollow camera;
     [HideInInspector]public int numPlayers = 2;
     [HideInInspector]public int counter = 0;

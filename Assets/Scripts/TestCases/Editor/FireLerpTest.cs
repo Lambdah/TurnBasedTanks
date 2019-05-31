@@ -69,11 +69,5 @@ public class FireLerpTest : MonoBehaviour {
         }
     }
 
-    [Test]
-    public void LerpMaxDistance()
-    {
-        float maxDistance = 30.0f;
-
-        TankFire tf = CreateObj();
-    }
+    
 }

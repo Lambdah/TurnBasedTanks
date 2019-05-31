@@ -27,6 +27,8 @@ public class TankBoardMovement : MonoBehaviour {
     bool move = false;
     bool generatePath = true;
     bool fire = false;
+    SoundManager sm;
+    
     
 
     private void Awake()
@@ -38,12 +40,14 @@ public class TankBoardMovement : MonoBehaviour {
 
     private void Start()
     {
-        
+        sm = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
     }
 
 
     // Notes: Still have to debug the BFS, maybe switch up Dijistrka's to A*.
     // BFS shows less tiles and is a speed slower than Dijistrika's algorithm.
+    // Another bug where if you click on multiple tiles, the tank does not move
+    // to proper location
     private void CreatePath()
     {
         // Debug.Log("curr node " + currNode.ToString());
@@ -103,6 +107,7 @@ public class TankBoardMovement : MonoBehaviour {
         
     }
 
+    
     private void FixedUpdate()
     {
         if (wait)
@@ -115,27 +120,32 @@ public class TankBoardMovement : MonoBehaviour {
             // Left click with mouse
             if (generatePath)
             {
+                sm.playEngineIdleLoop();
                 CreatePath();
                 generatePath = false;
             }
             if (Input.GetMouseButtonUp(0) && generatePath == false) // TankPath != null
             {
-                moveScript.TargetMove(TankPath);
+                sm.stopEngineIdleLoop();
                 DeactivePath();
+                moveScript.TargetMove(TankPath);
                 move = true;
+                sm.playEngineDriving();
             }
             if (move)
             {
                 if (!moveScript.Move())
                 {
+                    sm.stopEngineDrive();
                     move = false;
                     TankPath.Clear();
-                    fire = true;   
+                    fire = true;
+                    
                 }
             }
             if (fire)
             {
-                
+                sm.playEngineIdleLoop();
                 if (tankFire.FireTank(0.5f))
                 {
                     fire = false;
@@ -168,6 +178,7 @@ public class TankBoardMovement : MonoBehaviour {
     IEnumerator ExecuteAfterTime(float time)
     {
         yield return new WaitForSeconds(time);
+        sm.stopEngineIdleLoop();
         turnFinished = true;
 
     }

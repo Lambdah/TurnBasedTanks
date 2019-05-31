@@ -36,8 +36,7 @@ public class TankFire : MonoBehaviour {
 
     public float prevDistance;
     bool charging;
-
-    public float maxCharge = 1.75f;
+    SoundManager sm;
     
     
     ProjectileShell projectileShell;
@@ -57,6 +56,7 @@ public class TankFire : MonoBehaviour {
         chargeSpeed = (maxDistance - minDistance) / maxChargeTime;
         eventDriver = 0;
         currentDistance = minDistance;
+        sm = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
     }
 
     private void OnEnable()
@@ -171,6 +171,7 @@ public class TankFire : MonoBehaviour {
             prevDistance = currentDistance;
             if (Input.GetButtonDown("Fire1") && !fired)
             {
+                sm.playShotCharing();
                 fired = false;
             }
             else if (Input.GetButton("Fire1") && !fired)
@@ -190,6 +191,7 @@ public class TankFire : MonoBehaviour {
                 }
                 else if (currentDistance <= minDistance)
                 {
+                    sm.playShotCharing();
                     chargeFireForward = true;
                 }
                 aimSlider.value = currentDistance;
@@ -228,18 +230,11 @@ public class TankFire : MonoBehaviour {
 
     public bool Fire()
     {
-        Vector3 dirMax = maxDistance * shootableTargets.position.normalized;
-        Vector3 twoMax = 2f * shootableTargets.position.normalized;
-        // Debug.DrawLine(FirePoint.transform.position, dirMax, Color.blue, 15.0f);
-        // Debug.DrawLine(FirePoint.transform.position, 2*shootableTargets.position.normalized, Color.green, 15.0f);
-        // Debug.DrawLine(FirePoint.transform.position, shootableTargets.position, Color.red, 15.0f);
         float dist = Vector3.Distance(FirePoint.transform.position, shootableTargets.position);
-        // Vector3 maxDistanceDir = shootableTargets.position.normalized * maxDistance;
-        // float dist = Vector3.Distance(FirePoint.transform.position, maxDistanceDir);
-        // float percentDist = currentDistance / dist;
         float percentDist = currentDistance / dist;
-        Vector3 LerpPosition = Vector3.Lerp(transform.position, shootableTargets.position, percentDist);
-        
+        Debug.Log("Dist from target: " + dist + " percent of percentDist: " + percentDist + " currentDist: " + currentDistance);
+        Vector3 LerpPosition = Vector3.LerpUnclamped(transform.position, shootableTargets.position, percentDist);
+        sm.playShellFiring();
         projectileShell.FireArrow(FirePoint.transform.position, LerpPosition);
         return true;
     }

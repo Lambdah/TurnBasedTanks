@@ -18,7 +18,6 @@ public class BFSTest {
     {
         BoardManager bm = obj.AddComponent<BoardManager>();
         GameObject node = new GameObject();
-        Node no = node.AddComponent<Node>();
         bm.floorTiles = node;
         bm.rows = rows;
         bm.columns = col;

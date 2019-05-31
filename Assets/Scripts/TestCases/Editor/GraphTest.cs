@@ -8,7 +8,7 @@ using System.Collections.Generic;
 public class GraphTest {
 
     Node[,] graph;
-    Graph k = new Graph();
+   // Graph k = new Graph();
 
     [Test]
 	public void NewEditModeTestSimplePasses() {
@@ -17,7 +17,7 @@ public class GraphTest {
         int col = 5;
         Debug.Log("Testing");
         GameObject gameObj = new GameObject();
-        BoardManager bm = createBoardManager(gameObj, row, col);
+        // BoardManager bm = createBoardManager(gameObj, row, col);
         Graph gra = addGraphObject(gameObj);
         gra.CreateGraph();
         graph = gra.graph;
