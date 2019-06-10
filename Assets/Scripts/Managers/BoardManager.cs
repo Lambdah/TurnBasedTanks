@@ -55,12 +55,12 @@ public class BoardManager : MonoBehaviour {
                 node.tile.transform.Translate(i*2, 0, j*2);
                 node.tile.SetActive(true);
                 // Setting up the edges of the board
-                /*if (i == 0 || j == 0 || i == (rows - 1) || j == (columns - 1))
+                if (i == 0 || j == 0 || i == (rows - 1) || j == (columns - 1))
                 {
                     node.cost = 999;
                     GameObject wall =
                         Instantiate(outerWall, node.transform);
-                }*/
+                }
                
             }
         }
