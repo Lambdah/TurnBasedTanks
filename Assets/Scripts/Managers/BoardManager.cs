@@ -23,6 +23,7 @@ public class BoardManager : MonoBehaviour {
     public Graph graph;
     public int columns = 8; // columns in game board
     public int rows = 8; // rows in game board
+    public int outsideBorder = 10; // Outside board terrain
     public GameObject floorTiles;
     public GameObject[] wallTiles;
     public GameObject[] outerWallTiles;
@@ -42,6 +43,9 @@ public class BoardManager : MonoBehaviour {
     //Sets up outer wall and the floor of the game board
     void BoardSetup()
     {
+        int boardRow = 2 + rows;
+        int boardCol = 2 + columns;
+        GameObject outerWall = outerWallTiles[0];
         
         for (int i = 0; i < rows; i++)
         {
@@ -50,6 +54,13 @@ public class BoardManager : MonoBehaviour {
                 Node node = graph.graph[i, j];
                 node.tile.transform.Translate(i*2, 0, j*2);
                 node.tile.SetActive(true);
+                // Setting up the edges of the board
+                /*if (i == 0 || j == 0 || i == (rows - 1) || j == (columns - 1))
+                {
+                    node.cost = 999;
+                    GameObject wall =
+                        Instantiate(outerWall, node.transform);
+                }*/
                
             }
         }

@@ -9,7 +9,8 @@ public class Graph : MonoBehaviour{
     public Node[,] graph;
     public BoardManager bm;
     private Transform boardHolder;
-
+    
+    
     public Node[,] CreateGraph()
     {
         
@@ -19,6 +20,10 @@ public class Graph : MonoBehaviour{
         GameObject toInstaniate = bm.floorTiles;
         Vector3 origin = new Vector3(0, 0, 0);
         boardHolder = new GameObject("BoardGame").transform;
+        
+
+       
+
         for (int i=0; i < row; i++)
         {
             for (int j = 0; j < column; j++)

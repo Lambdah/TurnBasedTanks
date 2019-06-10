@@ -33,8 +33,8 @@ public class GameManager : MonoBehaviour
         player = new TankBoardMovement[numPlayers];
         startPosn = new Node[numPlayers];
         tankFire = new TankFire[numPlayers];
-        startPosn[0] = g.graph[0, 0];
-        startPosn[1] = g.graph[g.row - 1, g.column - 1];
+        startPosn[0] = g.graph[1, 1];
+        startPosn[1] = g.graph[g.row - 2, g.column - 2];
         for (int i=0; i < numPlayers; i++)
         {
             toInstantiate[i] =

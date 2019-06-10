@@ -82,6 +82,9 @@ public class ProjectileShell : MonoBehaviour {
             
             
             DestroyShell();
+        }else if (collision.gameObject.tag == "Wall")
+        {
+            DestroyShell();
         }
         
         this.gameObject.SetActive(false);

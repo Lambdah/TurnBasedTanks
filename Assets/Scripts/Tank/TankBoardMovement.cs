@@ -27,8 +27,8 @@ public class TankBoardMovement : MonoBehaviour {
     bool move = false;
     bool generatePath = true;
     bool fire = false;
+    bool checkPath = false;
     SoundManager sm;
-    
     
 
     private void Awake()
@@ -46,8 +46,6 @@ public class TankBoardMovement : MonoBehaviour {
 
     // Notes: Still have to debug the BFS, maybe switch up Dijistrka's to A*.
     // BFS shows less tiles and is a speed slower than Dijistrika's algorithm.
-    // Another bug where if you click on multiple tiles, the tank does not move
-    // to proper location
     private void CreatePath()
     {
         // Debug.Log("curr node " + currNode.ToString());
@@ -85,9 +83,7 @@ public class TankBoardMovement : MonoBehaviour {
     {
         if (other.gameObject.tag == "Node")
         {
-            //currNode = other.gameObject.GetComponent<Node>();
-            //x_location = currNode.posX;
-            //y_location = currNode.posY;
+            
             GameObject terrain = currNode.transform.GetChild(1).gameObject;
             terrain.SetActive(false);
             
@@ -124,13 +120,19 @@ public class TankBoardMovement : MonoBehaviour {
                 CreatePath();
                 generatePath = false;
             }
-            if (Input.GetMouseButtonUp(0) && generatePath == false) // TankPath != null
+            if (Input.GetMouseButtonUp(0) && generatePath == false && move == false)
+            {
+                // Checking of TankPath
+                if (TankPath.Count > 0) checkPath = true;
+            }
+            if (checkPath == true) 
             {
                 sm.stopEngineIdleLoop();
                 DeactivePath();
                 moveScript.TargetMove(TankPath);
                 move = true;
                 sm.playEngineDriving();
+                checkPath = false;
             }
             if (move)
             {
@@ -142,6 +144,7 @@ public class TankBoardMovement : MonoBehaviour {
                     fire = true;
                     
                 }
+                
             }
             if (fire)
             {
@@ -154,10 +157,10 @@ public class TankBoardMovement : MonoBehaviour {
                 
             }
         }
-       
+
     }
 
-    
+
     public void GridLocationMove(Node node)
     {
 

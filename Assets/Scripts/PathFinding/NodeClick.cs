@@ -26,10 +26,13 @@ public class NodeClick : MonoBehaviour {
     // not show the pathway is null error
     private void OnMouseDown()
     {
-        // Debug.Log(node.ToString());
+
+        GameObject select = node.tile.transform.GetChild(1).gameObject;
         player[gm.counter].GridLocationMove(node);
         player[gm.counter].targetNode = node;
         player[gm.counter].currNode = node;
+        
+        
     }
 
     

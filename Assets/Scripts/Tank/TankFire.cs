@@ -232,7 +232,7 @@ public class TankFire : MonoBehaviour {
     {
         float dist = Vector3.Distance(FirePoint.transform.position, shootableTargets.position);
         float percentDist = currentDistance / dist;
-        Debug.Log("Dist from target: " + dist + " percent of percentDist: " + percentDist + " currentDist: " + currentDistance);
+        // Debug.Log("Dist from target: " + dist + " percent of percentDist: " + percentDist + " currentDist: " + currentDistance);
         Vector3 LerpPosition = Vector3.LerpUnclamped(transform.position, shootableTargets.position, percentDist);
         sm.playShellFiring();
         projectileShell.FireArrow(FirePoint.transform.position, LerpPosition);
