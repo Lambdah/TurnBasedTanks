@@ -43,8 +43,6 @@ public class BoardManager : MonoBehaviour {
     //Sets up outer wall and the floor of the game board
     void BoardSetup()
     {
-        int boardRow = 2 + rows;
-        int boardCol = 2 + columns;
         GameObject outerWall = outerWallTiles[0];
         
         for (int i = 0; i < rows; i++)

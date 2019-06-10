@@ -4,14 +4,16 @@ using UnityEngine;
 
 public class CameraFollow : MonoBehaviour {
     public GameObject[] players;
-    public float shakeMagnitude;
     private Vector3 offset;
     private Vector3 shellOffset;
     private int currPlayer = 0;
     private bool chase = false;
+    private bool freeMove = false;
     private GameObject chaseObj;
     private Vector3 currPos;
-    
+    private IEnumerator m_camera;
+    private float cameraSpeed = 0.5f;
+    private Vector3 prevChase;
 
 
     public void SetUpCamera(GameObject[] playable_objs)
@@ -22,7 +24,17 @@ public class CameraFollow : MonoBehaviour {
 
     public void ChangePlayer(int change)
     {
-        currPlayer = change % players.Length;
+        if (freeMove)
+        {
+            currPlayer = change % players.Length;
+            m_camera = MoveCamera(new Vector3(prevChase.x, 42.0f, prevChase.z), players[currPlayer].transform.position + offset, cameraSpeed, change);
+            StartCoroutine(m_camera);
+        }
+        else
+        {
+            currPlayer = change % players.Length;
+        }
+        
     }
 
     public void ChaseAction(GameObject obj)
@@ -32,40 +44,63 @@ public class CameraFollow : MonoBehaviour {
         chaseObj = obj;
     }
 
-    public Vector3 Shake()
-    {
-        Debug.Log("Shake position");
-        float x = Random.Range(-1f, 1f) * shakeMagnitude;
-        float y = Random.Range(-1f, 1f) * shakeMagnitude;
-        float z = Random.Range(-1f, 1f) * shakeMagnitude;
-        return new Vector3(x, y, z);
-    }
 
     public void StopChase(Vector3 posn)
     {
+        Debug.Log("Stop Chase");
         transform.position = posn;
-        StartCoroutine("ExecuteAfterTime", 2.0f);
+        freeMove = true;
+        chase = false;
     }
 
-   
+    private void Update()
+    {
+        // Need this else the camera goes off the screen. Makes sure the camera does not move below 42.0f and starts clipping
+        if (transform.position.y < 42.0f)
+        {
+            transform.position = new Vector3(prevChase.x, 42.0f, prevChase.z);
+        }
+    }
+
 
     private void LateUpdate()
     {
         if (chase)
         {
-            transform.position = chaseObj.transform.position + shellOffset;
+
+            if (chaseObj.activeInHierarchy)
+            {
+                prevChase = chaseObj.transform.position + shellOffset;
+                transform.position = new Vector3(prevChase.x, 42.0f, prevChase.z);
+            }
+        }
+        else if (freeMove)
+        {
+            // Camera can move freely now
         }
         else
         {
             transform.position = players[currPlayer].transform.position + offset;
         }
         
+        
+    }
+
+    IEnumerator MoveCamera(Vector3 start, Vector3 end, float duration, int player)
+    {
+        for (float t = 0f; t < duration; t += Time.deltaTime)
+        {
+            transform.position = Vector3.Lerp(start, end, t / duration);
+            yield return 0;
+        }
+        transform.position = end;
+        freeMove = false;
     }
 
     IEnumerator ExecuteAfterTime(float time)
     {
         yield return new WaitForSeconds(time);
-        chase = false;
+        // chase = false;
         chaseObj = null;
 
     }
