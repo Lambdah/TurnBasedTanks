@@ -4,63 +4,82 @@ using UnityEngine;
 [Serializable]
 public class TankManager
 {
-    public Color m_PlayerColor;            
-    public Transform m_SpawnPoint;         
-    [HideInInspector] public int m_PlayerNumber;             
-    [HideInInspector] public string m_ColoredPlayerText;
-    [HideInInspector] public GameObject m_Instance;          
-    [HideInInspector] public int m_Wins;                     
+                
+    public Transform m_SpawnPoint;
+    [HideInInspector]public Color m_PlayerColor;
+    [HideInInspector] public int m_playerNumber;             
+    // [HideInInspector] public string m_coloredPlayerText;
+    [HideInInspector] public GameObject m_instance;          
+    [HideInInspector] public int m_wins;                     
 
 
-    private TankMovement m_Movement;       
-    private TankShooting m_Shooting;
-    private GameObject m_CanvasGameObject;
+    private TankBoardMovement m_movement;
+    private TankFire m_fire;
+    // private GameObject m_CanvasGameObject;
 
 
     public void Setup()
     {
-        m_Movement = m_Instance.GetComponent<TankMovement>();
-        m_Shooting = m_Instance.GetComponent<TankShooting>();
-        m_CanvasGameObject = m_Instance.GetComponentInChildren<Canvas>().gameObject;
+        m_movement = m_instance.GetComponent<TankBoardMovement>();
+        m_fire = m_instance.GetComponent<TankFire>();
+        // m_CanvasGameObject = m_instance.GetComponentInChildren<Canvas>().gameObject;
+        
+        m_movement.wait = true;
+        m_fire.wait = true;
 
-        m_Movement.m_PlayerNumber = m_PlayerNumber;
-        m_Shooting.m_PlayerNumber = m_PlayerNumber;
+        // m_coloredPlayerText = "<color=#" + ColorUtility.ToHtmlStringRGB(m_PlayerColor) + ">PLAYER " + m_playerNumber + "</color>";
 
-        m_ColoredPlayerText = "<color=#" + ColorUtility.ToHtmlStringRGB(m_PlayerColor) + ">PLAYER " + m_PlayerNumber + "</color>";
-
-        MeshRenderer[] renderers = m_Instance.GetComponentsInChildren<MeshRenderer>();
+        MeshRenderer[] renderers = m_instance.GetComponentsInChildren<MeshRenderer>();
 
         for (int i = 0; i < renderers.Length; i++)
         {
             renderers[i].material.color = m_PlayerColor;
         }
+
+        wait();
     }
 
-
-    public void DisableControl()
+    public void spawnPointNode(Node spawn)
     {
-        m_Movement.enabled = false;
-        m_Shooting.enabled = false;
-
-        m_CanvasGameObject.SetActive(false);
+        m_movement.TankCurrentNodePosition(spawn);
     }
 
-
-    public void EnableControl()
+    // Probably want to switch this to an array in the future
+    public void setShootableTargets(Transform target)
     {
-        m_Movement.enabled = true;
-        m_Shooting.enabled = true;
+        m_fire.shootableTargets = target;
+    }
 
-        m_CanvasGameObject.SetActive(true);
+   public void startTurn()
+   {
+        m_movement.wait = false;
+   }
+
+   public void wait()
+   {
+        m_movement.wait = true;
+        m_movement.turnFinished = false;
+   }
+
+   public void move(Node node)
+   {
+        m_movement.GridLocationMove(node);
+        m_movement.targetNode = node;
+        m_movement.currNode = node;
+   }
+
+    public bool turnFinished()
+    {
+        return m_movement.turnFinished;
     }
 
 
     public void Reset()
     {
-        m_Instance.transform.position = m_SpawnPoint.position;
-        m_Instance.transform.rotation = m_SpawnPoint.rotation;
+        m_instance.transform.position = m_SpawnPoint.position;
+        m_instance.transform.rotation = m_SpawnPoint.rotation;
 
-        m_Instance.SetActive(false);
-        m_Instance.SetActive(true);
+        m_instance.SetActive(false);
+        m_instance.SetActive(true);
     }
 }

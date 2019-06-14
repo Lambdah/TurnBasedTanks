@@ -10,7 +10,6 @@ public class TankFire : MonoBehaviour {
 
     public float turrentRotateSpeed = 2.2f;
     public Transform shootableTargets;
-    public GameObject shootableObject;
 
     public float minDistance = 0f;
     public float maxDistance = 15f;
@@ -40,17 +39,12 @@ public class TankFire : MonoBehaviour {
     
     
     ProjectileShell projectileShell;
-    // private IEnumerator arrow;
 
 	// Use this for initialization
 	void Start () {
         tankTurrent = this.transform.Find("Tank/TankRenderers/TankTurret").gameObject;
-        // turretMoveShotPos = RotateTurret(shootableTargets.position, turrentRotateSpeed);
-        // turretMoveOrigPos = RotateTurret(transform.forward, turrentRotateSpeed);
         turretMoveShotPos = RotateTurret(shootableTargets, turrentRotateSpeed);
-        // turretMoveOrigPos = RotateTurret(transform.forward, turrentRotateSpeed);
         FirePoint = this.transform.Find("Tank/TankRenderers/TankTurret/FirePoint").gameObject;
-        // projectileShell = Instantiate(Shell, gameObject.transform).GetComponent<ProjectileShell>();
         projectileShell = Instantiate(Shell, new Vector3(0,0,-999f), Quaternion.identity).GetComponent<ProjectileShell>();
         projectileShell.SetStart();
         chargeSpeed = (maxDistance - minDistance) / maxChargeTime;
@@ -232,7 +226,6 @@ public class TankFire : MonoBehaviour {
     {
         float dist = Vector3.Distance(FirePoint.transform.position, shootableTargets.position);
         float percentDist = currentDistance / dist;
-        // Debug.Log("Dist from target: " + dist + " percent of percentDist: " + percentDist + " currentDist: " + currentDistance);
         Vector3 LerpPosition = Vector3.LerpUnclamped(transform.position, shootableTargets.position, percentDist);
         sm.playShellFiring();
         projectileShell.FireArrow(FirePoint.transform.position, LerpPosition);
@@ -255,9 +248,7 @@ public class TankFire : MonoBehaviour {
         {
             
             step = Time.deltaTime * rotateSpeed;
-            // transform.rotation = Quaternion.Lerp(transform.rotation, rotation, step);
             tankTurrent.transform.rotation = Quaternion.Lerp(tankTurrent.transform.rotation, rotation, step);
-            // Debug.Log("rotation dir" + rotation.eulerAngles.ToString());
             yield return null;
         }
         

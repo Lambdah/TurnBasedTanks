@@ -16,7 +16,6 @@ public class ProjectileShell : MonoBehaviour {
     private Rigidbody rb;
     Vector3 velocity_obj;
     private ParticleSystem shellExplosion;
-    // private AudioSource shellExplosionAudio;
     private SoundManager sm;
     private CameraFollow cam;
     
@@ -43,7 +42,6 @@ public class ProjectileShell : MonoBehaviour {
         // when this code was in Start() function. So moved it to this function and have TankFire() call 
         // this function when gameobject is instantiated
         shellExplosion = Instantiate(shellExplosion_prefab).GetComponent<ParticleSystem>();
-        // shellExplosionAudio = shellExplosion_prefab.GetComponent<AudioSource>();
         sm = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
         shellExplosion.gameObject.SetActive(false);
         collided = false;

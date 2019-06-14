@@ -7,72 +7,91 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     // PathFind path = new PathFind();
-    public GameObject tank;
+    public GameObject tankPrefab;
     public GameObject boardManager;
     public GameObject soundManager;
+    public int numPlayers = 2;
+    // Colors are set up in the inspector
+    public Color[] m_playerColor;
+    public TankManager[] m_tanks;
     [HideInInspector]public CameraFollow camera;
-    [HideInInspector]public int numPlayers = 2;
     [HideInInspector]public int counter = 0;
-    [HideInInspector]public TankBoardMovement[] player;
-    TankFire[] tankFire;
+    [HideInInspector]public Node[] startPosn;
+    BoardManager bm;
     Graph g;
-    Queue<Node> moveableTiles;
-    Node[] startPosn;
-    float speed;
-    Node currPos;
     
 
-
-    // Attempting to instantiate the Board and reference the nodes created gives a nullreference error
-    public void Start()
+    public void SpawnBoard()
     {
-        
-        g = boardManager.GetComponent<Graph>();
-        Vector3 posTank = g.graph[0,0].tile.transform.position;
-        GameObject []toInstantiate = new GameObject[numPlayers];
-        player = new TankBoardMovement[numPlayers];
-        startPosn = new Node[numPlayers];
-        tankFire = new TankFire[numPlayers];
-        startPosn[0] = g.graph[1, 1];
-        startPosn[1] = g.graph[g.row - 2, g.column - 2];
-        for (int i=0; i < numPlayers; i++)
-        {
-            toInstantiate[i] =
-                Instantiate(tank, startPosn[i].tile.transform.position, Quaternion.identity) as GameObject;
-            player[i] = toInstantiate[i].GetComponent<TankBoardMovement>();
-            player[i].TankCurrentNodePosition(startPosn[i]);
-            player[i].wait = true;
-            tankFire[i] = toInstantiate[i].GetComponent<TankFire>();
-            tankFire[i].wait = true;
-        }
-
-        // Setting up the shootable targets. Have to switch shootabletargets to be an array and load with all targets.
-        // Before I can do this I have to add a button that allows for switching targets
-        tankFire[0].shootableTargets = toInstantiate[1].transform;
-        tankFire[1].shootableTargets = toInstantiate[0].transform;
-
-        tankFire[0].shootableObject = toInstantiate[1];
-        tankFire[1].shootableObject = toInstantiate[0];
-
-        // Camera set up to follow the current player
-        camera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraFollow>();
-        camera.SetUpCamera(toInstantiate);
-        camera.ChangePlayer(0);
-        counter = 0;
+        bm = boardManager.GetComponent<BoardManager>();
+        bm.SetupBoard();
     }
 
-    // Not properly changing players
+    public void SpawnTanks()
+    {
+
+        m_tanks = new TankManager[numPlayers];
+        g = boardManager.GetComponent<Graph>();
+        startPosn = new Node[numPlayers];
+        startPosn[0] = g.graph[1, 1];
+        startPosn[1] = g.graph[g.row - 2, g.column - 2];
+
+        for (int i = 0; i < numPlayers; i++)
+        {
+            m_tanks[i] = new TankManager();
+            m_tanks[i].m_instance = 
+                Instantiate(tankPrefab, startPosn[i].tile.transform.position, Quaternion.identity) as GameObject;
+            m_tanks[i].m_PlayerColor = m_playerColor[i];
+            m_tanks[i].Setup();
+            m_tanks[i].m_SpawnPoint = m_tanks[i].m_instance.transform;
+            m_tanks[i].spawnPointNode(startPosn[i]);
+            m_tanks[i].m_playerNumber = i;
+            
+        }
+
+        // Setting up the targets
+        for (int i = 0; i < numPlayers; i++)
+        {
+            for (int j = 0; j < numPlayers; j++)
+            {
+                if ((j + 1) != (i + 1)) m_tanks[i].setShootableTargets(m_tanks[j].m_instance.transform);
+            }
+        }
+
+        counter = 0;
+    }
+    
+    public void setUpCamera()
+    {
+        GameObject[] cameraFollowObjects = new GameObject[m_tanks.Length];
+        for (int i = 0; i < m_tanks.Length; i++)
+        {
+            cameraFollowObjects[i] = m_tanks[i].m_instance;
+        }
+        // Camera set up to follow the current player
+        camera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraFollow>();
+        camera.SetUpCamera(cameraFollowObjects);
+        camera.ChangePlayer(counter);
+    }
+        
+    
+    public void Start()
+    {
+        SpawnBoard();
+        SpawnTanks();
+        setUpCamera();
+        
+    }
+
     public void Update()
     {
-        player[counter].wait = false;
-        if (player[counter].turnFinished){
-            player[counter].wait = true;
-            player[counter].turnFinished = false;
+        m_tanks[counter].startTurn();
+        if (m_tanks[counter].turnFinished())
+        {
+            m_tanks[counter].wait();
             counter = (counter + 1) % numPlayers;
             camera.ChangePlayer(counter);
-              
         }
-        
         
     }
 

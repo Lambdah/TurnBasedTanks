@@ -47,7 +47,6 @@ public class CameraFollow : MonoBehaviour {
 
     public void StopChase(Vector3 posn)
     {
-        Debug.Log("Stop Chase");
         transform.position = posn;
         freeMove = true;
         chase = false;

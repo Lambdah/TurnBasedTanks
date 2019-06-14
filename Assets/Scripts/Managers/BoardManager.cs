@@ -28,7 +28,7 @@ public class BoardManager : MonoBehaviour {
     public GameObject[] wallTiles;
     public GameObject[] outerWallTiles;
 
-    private Transform boardHolder;
+    // private Transform boardHolder;
     
 
     //Clears grid list and creates a new board
@@ -64,6 +64,12 @@ public class BoardManager : MonoBehaviour {
         }
     }
 
+    public void SetupBoard()
+    {
+        InitializeList();
+        BoardSetup();
+    }
+
     public void Awake()
     {
         graph = GetComponent<Graph>();
@@ -72,8 +78,8 @@ public class BoardManager : MonoBehaviour {
 
     private void Start()
     {
-        InitializeList();
-        BoardSetup();
+        //InitializeList();
+        //BoardSetup();
     }
    
 }
