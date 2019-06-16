@@ -156,7 +156,6 @@ public class MoveScript : MonoBehaviour {
 
         if(nTargets == null)
         {
-            //Debug.Log("nTargets is null");
             return true;
         }
 

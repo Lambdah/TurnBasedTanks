@@ -60,12 +60,29 @@ public class TankBoardMovement : MonoBehaviour {
 
             if (path.NodeCost(k) < movement && k != currNode)
             {
-                //Debug.Log(k.ToString());
-                GameObject moveable = k.tile.transform.GetChild(1).gameObject;
-                moveable.SetActive(true);
+                
+                if (tileShootableRange(k))
+                {
+                    k.tile.transform.GetChild(2).gameObject.SetActive(true);
+                }
+                else
+                {
+                    k.tile.transform.GetChild(1).gameObject.SetActive(true);
+                }
+                
+                
             }
 
         }
+    }
+
+    private bool tileShootableRange(Node node)
+    {
+        if (Vector3.Distance(node.tile.transform.position, tankFire.shootableTargets.position) <= tankFire.maxDistance)
+        {
+            return true;
+        }
+        return false;
     }
 
     private void DeactivePath()
@@ -73,7 +90,9 @@ public class TankBoardMovement : MonoBehaviour {
         foreach(Node k in moveableTiles)
         {
             GameObject moveable = k.tile.transform.GetChild(1).gameObject;
+            GameObject shootable = k.tile.transform.GetChild(2).gameObject;
             moveable.SetActive(false);
+            shootable.SetActive(false);
         }
     }
 
@@ -124,7 +143,6 @@ public class TankBoardMovement : MonoBehaviour {
             {
                 // Checking of TankPath
                 if (TankPath.Count > 0) checkPath = true;
-                // checkPath = true;
             }
             if (checkPath == true) 
             {
@@ -165,17 +183,14 @@ public class TankBoardMovement : MonoBehaviour {
     public void GridLocationMove(Node node)
     {
 
-
         GameObject select = node.tile.transform.GetChild(1).gameObject;
-        if (select.activeSelf)
+        GameObject shootable = node.tile.transform.GetChild(2).gameObject;
+        if (select.activeSelf || shootable.activeSelf)
         {
             List<Node> tankPath = path.PathWay(node);
             TankPath = tankPath;
         }
-        else
-        {
-            TankPath = null;
-        }
+        
 
     }
 

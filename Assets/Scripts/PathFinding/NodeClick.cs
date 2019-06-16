@@ -8,7 +8,8 @@ public class NodeClick : MonoBehaviour {
     Node node;
     GameManager gm;
     TankManager[] tm;
-    TankBoardMovement[] player;
+    
+    
 	// Use this for initialization
 	void Start () {
         tile = this.transform.parent.gameObject;
@@ -27,8 +28,6 @@ public class NodeClick : MonoBehaviour {
 
     private void OnMouseDown()
     {
-
-        GameObject select = node.tile.transform.GetChild(1).gameObject;
         gm.m_tanks[gm.counter].move(node);
         
     }
