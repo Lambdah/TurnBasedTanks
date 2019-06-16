@@ -38,11 +38,15 @@ public class BoardManager : MonoBehaviour {
         graph.CreateGraph();
     }
 
-    //Sets up outer wall and the floor of the game board
+    // Sets up outer wall and the floor of the game board
     void BoardSetup()
     {
-        GameObject outerWall = outerWallTiles[0];
-        
+        Dictionary<String, GameObject> wallObj = new Dictionary<String, GameObject>();
+        wallObj.Add("South", wallTiles[0]);
+        wallObj.Add("North", wallTiles[1]);
+        wallObj.Add("West", wallTiles[2]);
+        wallObj.Add("East", wallTiles[3]);
+
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < columns; j++)
@@ -50,14 +54,45 @@ public class BoardManager : MonoBehaviour {
                 Node node = graph.graph[i, j];
                 node.tile.transform.Translate(i*2, 0, j*2);
                 node.tile.SetActive(true);
-                // Setting up the edges of the board
-                if (i == 0 || j == 0 || i == (rows - 1) || j == (columns - 1))
+                // Setting up the barrier
+                if (i == 0 && j == 0)
                 {
-                    node.cost = 999;
-                    GameObject wall =
-                        Instantiate(outerWall, node.transform);
+                    Instantiate(wallObj["South"], node.transform);
+                    Instantiate(wallObj["East"], node.transform);
                 }
-               
+                else if (i == 0 && j == (columns - 1))
+                {
+                    Instantiate(wallObj["South"], node.transform);
+                    Instantiate(wallObj["West"], node.transform);
+                }
+                else if (i == (rows - 1) && j == (columns - 1))
+                {
+                    Instantiate(wallObj["North"], node.transform);
+                    Instantiate(wallObj["West"], node.transform);
+                }
+                else if (i == (rows - 1) && j == 0)
+                {
+                    Instantiate(wallObj["North"], node.transform);
+                    Instantiate(wallObj["East"], node.transform);
+                }
+                else if (i < (rows - 1) && j == 0)
+                {
+                    Instantiate(wallObj["East"], node.transform);
+                }
+                else if (i == 0 && j < (columns - 1))
+                {
+                    Instantiate(wallObj["South"], node.transform);
+                }
+                else if (i == (rows - 1) && j < (columns - 1))
+                {
+                    Instantiate(wallObj["North"], node.transform);
+                }
+                else if (i < (rows - 1) && j == (columns - 1))
+                {
+                    Instantiate(wallObj["West"], node.transform);
+                }
+                
+
             }
         }
     }

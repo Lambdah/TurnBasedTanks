@@ -124,6 +124,7 @@ public class TankBoardMovement : MonoBehaviour {
             {
                 // Checking of TankPath
                 if (TankPath.Count > 0) checkPath = true;
+                // checkPath = true;
             }
             if (checkPath == true) 
             {

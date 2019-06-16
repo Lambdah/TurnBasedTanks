@@ -75,7 +75,7 @@ public class TankHealth : MonoBehaviour
     {
         if (other.gameObject.tag == "Shell")
         {
-            Debug.Log("Hit");
+            
             TakeDamage(m_damage);
         }
     }
