@@ -27,8 +27,6 @@ public class BoardManager : MonoBehaviour {
     public GameObject floorTiles;
     public GameObject[] wallTiles;
     public GameObject[] outerWallTiles;
-
-    // private Transform boardHolder;
     
 
     //Clears grid list and creates a new board
@@ -78,8 +76,7 @@ public class BoardManager : MonoBehaviour {
 
     private void Start()
     {
-        //InitializeList();
-        //BoardSetup();
+
     }
    
 }

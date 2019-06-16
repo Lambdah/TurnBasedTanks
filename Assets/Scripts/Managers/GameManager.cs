@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-//using UnityEngine.SceneManagement;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    // PathFind path = new PathFind();
     public GameObject tankPrefab;
     public GameObject boardManager;
     public GameObject soundManager;
@@ -19,7 +18,11 @@ public class GameManager : MonoBehaviour
     [HideInInspector]public Node[] startPosn;
     BoardManager bm;
     Graph g;
-    
+    WaitForSeconds m_start;
+    WaitForSeconds m_end;
+    float m_startDelay = 4.0f;
+    float m_endDelay = 4.0f;
+
 
     public void SpawnBoard()
     {
@@ -77,21 +80,96 @@ public class GameManager : MonoBehaviour
     
     public void Start()
     {
+        WaitForSeconds m_start = new WaitForSeconds(m_startDelay);
+        WaitForSeconds m_end = new WaitForSeconds(m_endDelay);
         SpawnBoard();
         SpawnTanks();
         setUpCamera();
+        StartCoroutine(GameLoop());
+    }
+
+    IEnumerator GameLoop()
+    {
+        yield return StartCoroutine(StartGame());
+        yield return StartCoroutine(PlayGame());
+        yield return StartCoroutine(EndGame());
+
+        if (GetWinner() == null)
+        {
+            StartCoroutine(GameLoop());
+        }
+        else
+        {
+            SceneManager.LoadScene("start");
+        }
         
+    }
+
+    IEnumerator StartGame()
+    {
+        ResetTanks();
+        setUpCamera();
+        counter = 0;
+        yield return m_start;
+    }
+
+    IEnumerator EndGame()
+    {
+        yield return m_end;
+    }
+
+    IEnumerator PlayGame()
+    {
+        while (!OneTankLeft())
+        {
+            m_tanks[counter].startTurn();
+            if (m_tanks[counter].turnFinished())
+            {
+                m_tanks[counter].wait();
+                counter = (counter + 1) % numPlayers;
+                camera.ChangePlayer(counter);
+            }
+            yield return null;
+        }
+    }
+
+    private void ResetTanks()
+    {
+        for (int i = 0; i < m_tanks.Length; i++)
+        {
+            m_tanks[i].Reset();
+        }
     }
 
     public void Update()
     {
-        m_tanks[counter].startTurn();
-        if (m_tanks[counter].turnFinished())
+        
+    }
+
+    public bool OneTankLeft()
+    {
+        int num_tanks = 0;
+        for (int i = 0; i < m_tanks.Length; i++)
         {
-            m_tanks[counter].wait();
-            counter = (counter + 1) % numPlayers;
-            camera.ChangePlayer(counter);
+            if (m_tanks[i].m_instance.activeSelf)
+            {
+                num_tanks++;
+            }
         }
+        if (num_tanks < 2) return true;
+        return false;
+    }
+
+    public GameObject GetWinner()
+    {
+        for (int i = 0; i < m_tanks.Length; i++)
+        {
+            if (m_tanks[i].m_instance.activeSelf)
+            {
+                return m_tanks[i].m_instance;
+            }
+        }
+        return null;
         
     }
 
