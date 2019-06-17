@@ -10,25 +10,24 @@ public class TankManager
     [HideInInspector] public int m_playerNumber;             
     // [HideInInspector] public string m_coloredPlayerText;
     [HideInInspector] public GameObject m_instance;          
-    [HideInInspector] public int m_wins;                     
+    [HideInInspector] public int m_wins;
 
 
+    private TankDamageOverlay m_tankDamage;
     private TankBoardMovement m_movement;
     private TankFire m_fire;
     // private GameObject m_CanvasGameObject;
-
 
     public void Setup()
     {
         m_movement = m_instance.GetComponent<TankBoardMovement>();
         m_fire = m_instance.GetComponent<TankFire>();
+        m_tankDamage = m_instance.GetComponent<TankDamageOverlay>();
+        m_tankDamage.setFollowTarget(m_instance.transform);
         // m_CanvasGameObject = m_instance.GetComponentInChildren<Canvas>().gameObject;
-        
         m_movement.wait = true;
         m_fire.wait = true;
-
         // m_coloredPlayerText = "<color=#" + ColorUtility.ToHtmlStringRGB(m_PlayerColor) + ">PLAYER " + m_playerNumber + "</color>";
-
         MeshRenderer[] renderers = m_instance.GetComponentsInChildren<MeshRenderer>();
 
         for (int i = 0; i < renderers.Length; i++)
@@ -38,7 +37,7 @@ public class TankManager
 
         wait();
     }
-
+    
     public void spawnPointNode(Node spawn)
     {
         m_movement.TankCurrentNodePosition(spawn);
