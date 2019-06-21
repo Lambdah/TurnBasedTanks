@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
     WaitForSeconds m_start;
     WaitForSeconds m_end;
     float m_startDelay = 4.0f;
-    float m_endDelay = 4.0f;
+    float m_endDelay = 8.0f;
 
 
     public void SpawnBoard()

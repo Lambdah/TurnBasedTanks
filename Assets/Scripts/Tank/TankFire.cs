@@ -11,7 +11,7 @@ public class TankFire : MonoBehaviour {
     public float turrentRotateSpeed = 2.2f;
     public Transform shootableTargets;
 
-    public float minDistance = 0f;
+    public float minDistance = 2f;
     public float maxDistance = 15f;
     public float maxChargeTime = 0.75f;
     public GameObject Shell;
@@ -21,6 +21,7 @@ public class TankFire : MonoBehaviour {
     private float currentDistance;
     private float chargeSpeed;
     private bool fired;
+    private float zeroDistance = 0f;
 
     private IEnumerator turretMoveShotPos;
     private IEnumerator turretMoveOrigPos;
@@ -33,7 +34,7 @@ public class TankFire : MonoBehaviour {
     private bool chargeFireForward = true;
     GameObject FirePoint;
 
-    public float prevDistance;
+    float prevDistance;
     bool charging;
     SoundManager sm;
     
@@ -55,8 +56,8 @@ public class TankFire : MonoBehaviour {
 
     private void OnEnable()
     {
-        currentDistance = minDistance;
-        aimSlider.value = minDistance;
+        currentDistance = zeroDistance;
+        aimSlider.value = zeroDistance;
 
     }
 
@@ -106,7 +107,8 @@ public class TankFire : MonoBehaviour {
             {
                 fired = false;
                 chargeFireForward = true;
-                aimSlider.value = minDistance;
+                currentDistance = zeroDistance;
+                aimSlider.value = zeroDistance;
                 eventDriver = 0;
                 charging = false;
                 return true;
@@ -226,8 +228,10 @@ public class TankFire : MonoBehaviour {
     {
         float dist = Vector3.Distance(FirePoint.transform.position, shootableTargets.position);
         float percentDist = currentDistance / dist;
+        float minDist = minDistance / dist;
         Vector3 LerpPosition = Vector3.LerpUnclamped(transform.position, shootableTargets.position, percentDist);
         sm.playShellFiring();
+        if (percentDist <= minDist) percentDist = minDist + 0.05f;
         projectileShell.FireArrow(FirePoint.transform.position, LerpPosition);
         return true;
     }

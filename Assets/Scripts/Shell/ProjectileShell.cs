@@ -53,7 +53,6 @@ public class ProjectileShell : MonoBehaviour {
     {
         shellExplosion.gameObject.SetActive(false);
         this.gameObject.SetActive(true);
-        //velocity_obj = BallisticVelocityVector(transform.position, target, degrees);
         transform.position = startPos;
         velocity_obj = BallisticVelocityVector(transform.position, Arrow, degrees);
         rb.velocity = velocity_obj;
